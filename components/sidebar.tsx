@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import Image from "next/image"
 import { cn } from "@/lib/utils"
 import {
   LayoutDashboard,
@@ -75,8 +76,14 @@ function SidebarContent({ userType, userName = "User", userRole = "Staff", onLin
   return (
     <>
       <div className="flex h-16 items-center gap-2 border-b border-border px-6">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-          <Activity className="h-5 w-5 text-primary-foreground" />
+        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-secondary">
+          <Image
+                          src="/color.png"
+                          alt="Sanvya Logo"
+                          width={50}
+                          height={50}
+                          className="h-50 w-50 object-contain"
+           />
         </div>
         <div>
           <h1 className="text-lg font-semibold text-foreground">Sanvya</h1>

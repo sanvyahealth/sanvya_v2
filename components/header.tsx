@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Bell, Search, Menu } from "lucide-react"
+import { useSidebar } from "@/components/sidebar-provider"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -23,6 +24,7 @@ interface HeaderProps {
 export function Header({ title, onMenuClick }: HeaderProps) {
   const [searchQuery, setSearchQuery] = useState("")
   const [isMounted, setIsMounted] = useState(false)
+  const { setOpen } = useSidebar()
 
   useEffect(() => {
     setIsMounted(true)
@@ -31,7 +33,7 @@ export function Header({ title, onMenuClick }: HeaderProps) {
   return (
     <header className="flex h-16 items-center justify-between border-b border-border bg-card px-4 sm:px-6">
       <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
-        <Button variant="ghost" size="icon" className="lg:hidden shrink-0" onClick={onMenuClick}>
+        <Button variant="ghost" size="icon" className="lg:hidden shrink-0" onClick={onMenuClick || (() => setOpen(true))}>
           <Menu className="h-5 w-5" />
         </Button>
         <h1 className="text-lg sm:text-xl font-semibold text-foreground truncate">{title}</h1>

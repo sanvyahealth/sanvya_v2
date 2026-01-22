@@ -56,7 +56,7 @@ export default function AdminDashboard() {
             change="+8 from yesterday"
             changeType="positive"
             icon={BedDouble}
-            iconColor="bg-secondary"
+            iconColor="bg-primary"
           />
           <StatsCard
             title="Appointments"
@@ -139,7 +139,7 @@ export default function AdminDashboard() {
         {/* Bottom Row */}
         <div className="grid gap-6 lg:grid-cols-3">
           {/* Recent Admissions */}
-          <Card className="border-border lg:col-span-2">
+          <Card className="border-border lg:col-span-2 w-full min-w-0 max-w-full">
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
                 <CardTitle>Recent Admissions</CardTitle>
@@ -150,7 +150,7 @@ export default function AdminDashboard() {
               </Button>
             </CardHeader>
             <CardContent>
-              <div className="overflow-x-auto">
+              <div className="w-full overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>

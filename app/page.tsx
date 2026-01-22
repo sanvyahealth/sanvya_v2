@@ -33,9 +33,9 @@ export default function HomePage() {
               <Image
                 src="/color.png"
                 alt="Sanvya Logo"
-                width={32}
-                height={32}
-                className="h-8 w-8 object-contain"
+                width={50}
+                height={50}
+                className="h-50 w-50 object-contain"
               />
             </div>
             <span className="text-lg sm:text-xl font-semibold text-foreground">Sanvya</span>
@@ -109,7 +109,7 @@ export default function HomePage() {
             className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3"
           >
             <motion.div variants={item}>
-              <Card className="border-border bg-card">
+              <Card className="h-full border-border bg-card">
                 <CardHeader>
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
                     <Users className="h-5 w-5 text-primary" />
@@ -131,10 +131,10 @@ export default function HomePage() {
             </motion.div>
 
             <motion.div variants={item}>
-              <Card className="border-border bg-card">
+              <Card className="h-full border-border bg-card">
                 <CardHeader>
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary/10">
-                    <Building2 className="h-5 w-5 text-secondary" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                    <Building2 className="h-5 w-5 text-primary" />
                   </div>
                   <CardTitle className="mt-4">IPD Module</CardTitle>
                   <CardDescription>Comprehensive inpatient department management</CardDescription>
@@ -153,7 +153,7 @@ export default function HomePage() {
             </motion.div>
 
             <motion.div variants={item}>
-              <Card className="border-border bg-card">
+              <Card className="h-full border-border bg-card">
                 <CardHeader>
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
                     <Shield className="h-5 w-5 text-primary" />
@@ -187,7 +187,7 @@ export default function HomePage() {
             transition={{ duration: 0.5 }}
             className="mx-auto max-w-2xl text-center"
           >
-            <h2 className="text-3xl font-bold text-foreground">Access Your Portal</h2>
+            <h2 className="text-3xl font-bold text-primary">Access Your Portal</h2>
             <p className="mt-4 text-muted-foreground">Choose your role to access the appropriate dashboard</p>
           </motion.div>
 
@@ -214,10 +214,10 @@ export default function HomePage() {
 
             <motion.div variants={item}>
               <Link href="/auth" className="group">
-                <Card className="h-full border-border bg-card transition-all hover:border-secondary hover:shadow-lg">
+                <Card className="h-full border-border bg-card transition-all hover:border-primary hover:shadow-lg">
                   <CardHeader className="text-center">
-                    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-xl bg-secondary/10 transition-colors group-hover:bg-secondary">
-                      <Activity className="h-8 w-8 text-secondary transition-colors group-hover:text-secondary-foreground" />
+                    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-xl bg-primary/10 transition-colors group-hover:bg-primary">
+                      <Activity className="h-8 w-8 text-primary transition-colors group-hover:text-primary-foreground" />
                     </div>
                     <CardTitle className="mt-4">Doctor Portal</CardTitle>
                     <CardDescription>Access appointments, patient records, and schedules</CardDescription>
