@@ -1,9 +1,9 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import Image from "next/image"
-import { cn } from "@/lib/utils"
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import Image from "next/image";
+import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
   Users,
@@ -21,14 +21,16 @@ import {
   Activity,
   Scissors,
   Shield,
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Sheet, SheetContent } from "@/components/ui/sheet"
+  UserRound,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 
 const adminNavItems = [
   { title: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { title: "Patients", href: "/admin/patients", icon: Users },
+  { title: "Staffs", href: "#", icon: UserRound },
   { title: "Doctors", href: "/admin/doctors", icon: Stethoscope },
   { title: "Departments", href: "/admin/departments", icon: Building2 },
   { title: "Wards", href: "/admin/wards", icon: BedDouble },
@@ -38,8 +40,18 @@ const adminNavItems = [
   { title: "Lab & Radiology", href: "/admin/lab", icon: FlaskConical },
   { title: "Billing", href: "/admin/billing", icon: CreditCard },
   { title: "Reports", href: "/admin/reports", icon: FileText },
+  { title: "Nurses", href: "#", icon: UserRound },
+  { title: "Lab Technicians", href: "#", icon: FlaskConical },
+  { title: "Pharmacists", href: "#", icon: Stethoscope },
+  { title: "Prescriptions", href: "#", icon: FileText },
+  { title: "Inventory", href: "#", icon: Building2 },
+  { title: "OPD Revenue", href: "#", icon: DoorOpen },
+  { title: "Analytics", href: "#", icon: Calendar },
+  { title: "User Managements", href: "#", icon: UserRound },
+  { title: "Lab Reports", href: "#", icon: FlaskConical },
+  { title: "Notifications", href: "#", icon: FileText },
   { title: "Settings", href: "/admin/settings", icon: Settings },
-]
+];
 
 const doctorNavItems = [
   { title: "Dashboard", href: "/doctor", icon: LayoutDashboard },
@@ -49,7 +61,7 @@ const doctorNavItems = [
   { title: "Surgeries", href: "/doctor/surgeries", icon: Scissors },
   { title: "Schedule", href: "/doctor/schedule", icon: Activity },
   { title: "Settings", href: "/doctor/settings", icon: Settings },
-]
+];
 
 const patientNavItems = [
   { title: "Dashboard", href: "/patient", icon: LayoutDashboard },
@@ -59,31 +71,41 @@ const patientNavItems = [
   { title: "Billing", href: "/patient/billing", icon: CreditCard },
   { title: "Insurance", href: "/patient/insurance", icon: Shield },
   { title: "Settings", href: "/patient/settings", icon: Settings },
-]
+];
 
 interface SidebarProps {
-  userType: "admin" | "doctor" | "patient"
-  userName?: string
-  userRole?: string
-  open?: boolean
-  onOpenChange?: (open: boolean) => void
+  userType: "admin" | "doctor" | "patient";
+  userName?: string;
+  userRole?: string;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-function SidebarContent({ userType, userName = "User", userRole = "Staff", onLinkClick }: SidebarProps & { onLinkClick?: () => void }) {
-  const pathname = usePathname()
-  const navItems = userType === "admin" ? adminNavItems : userType === "doctor" ? doctorNavItems : patientNavItems
+function SidebarContent({
+  userType,
+  userName = "User",
+  userRole = "Staff",
+  onLinkClick,
+}: SidebarProps & { onLinkClick?: () => void }) {
+  const pathname = usePathname();
+  const navItems =
+    userType === "admin"
+      ? adminNavItems
+      : userType === "doctor"
+        ? doctorNavItems
+        : patientNavItems;
 
   return (
     <>
       <div className="flex h-16 items-center gap-2 border-b border-border px-6">
         <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-secondary">
           <Image
-                          src="/color.png"
-                          alt="Sanvya Logo"
-                          width={50}
-                          height={50}
-                          className="h-50 w-50 object-contain"
-           />
+            src="/color.png"
+            alt="Sanvya Logo"
+            width={50}
+            height={50}
+            className="h-50 w-50 object-contain"
+          />
         </div>
         <div>
           <h1 className="text-lg font-semibold text-foreground">Sanvya</h1>
@@ -94,7 +116,7 @@ function SidebarContent({ userType, userName = "User", userRole = "Staff", onLin
       <ScrollArea className="flex-1 px-3 py-4">
         <nav className="space-y-1">
           {navItems.map((item) => {
-            const isActive = pathname === item.href
+            const isActive = pathname === item.href;
             return (
               <Link
                 key={item.href}
@@ -110,7 +132,7 @@ function SidebarContent({ userType, userName = "User", userRole = "Staff", onLin
                 <item.icon className="h-4 w-4" />
                 {item.title}
               </Link>
-            )
+            );
           })}
         </nav>
       </ScrollArea>
@@ -132,15 +154,25 @@ function SidebarContent({ userType, userName = "User", userRole = "Staff", onLin
         </div>
       </div>
     </>
-  )
+  );
 }
 
-export function Sidebar({ userType, userName, userRole, open, onOpenChange }: SidebarProps) {
+export function Sidebar({
+  userType,
+  userName,
+  userRole,
+  open,
+  onOpenChange,
+}: SidebarProps) {
   return (
     <>
       {/* Desktop Sidebar */}
       <div className="hidden lg:flex h-screen w-64 flex-col border-r border-border bg-card">
-        <SidebarContent userType={userType} userName={userName} userRole={userRole} />
+        <SidebarContent
+          userType={userType}
+          userName={userName}
+          userRole={userRole}
+        />
       </div>
 
       {/* Mobile Sidebar */}
@@ -157,5 +189,5 @@ export function Sidebar({ userType, userName, userRole, open, onOpenChange }: Si
         </SheetContent>
       </Sheet>
     </>
-  )
+  );
 }
