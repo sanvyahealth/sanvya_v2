@@ -146,10 +146,13 @@ export default function AdminDashboard() {
                       tickFormatter={(v) => `₹${v / 100000}L`}
                     />
                     <Tooltip
-                      formatter={(value: number, name: string) => [
+                      formatter={(
+                        value: number | undefined,
+                        name: string | undefined,
+                      ) => [
                         name === "revenue"
-                          ? `₹${(value / 100000).toFixed(1)}L`
-                          : value.toString(),
+                          ? `₹${((value ?? 0) / 100000).toFixed(1)}L`
+                          : (value ?? 0).toString(),
                         name === "revenue" ? "Revenue" : "Patients",
                       ]}
                       contentStyle={{
@@ -175,7 +178,7 @@ export default function AdminDashboard() {
           <Card className="border-border">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Building2 className="h-5 w-5 text-secondary" />
+                <Building2 className="h-5 w-5 text-primary" />
                 Department Occupancy
               </CardTitle>
               <CardDescription>
@@ -201,7 +204,10 @@ export default function AdminDashboard() {
                       width={90}
                     />
                     <Tooltip
-                      formatter={(value: number) => [`${value}%`, "Occupancy"]}
+                      formatter={(value: number | undefined) => [
+                        `${value ?? 0}%`,
+                        "Occupancy",
+                      ]}
                       contentStyle={{
                         borderRadius: "8px",
                         border: "1px solid #e2e8f0",

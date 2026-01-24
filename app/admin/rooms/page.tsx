@@ -1,11 +1,11 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Header } from "@/components/header"
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
+import { useState } from "react";
+import { Header } from "@/components/header";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -13,29 +13,38 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Search, Plus, DoorOpen, BedDouble, Edit } from "lucide-react"
-import { rooms, wards } from "@/lib/demo-data"
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Search, Plus, DoorOpen, BedDouble, Edit } from "lucide-react";
+import { rooms, wards } from "@/lib/demo-data";
 
 const statusColors = {
   Available: "bg-green-100 text-green-700",
   Full: "bg-red-100 text-red-700",
-}
+};
 
 export default function RoomsPage() {
-  const [searchQuery, setSearchQuery] = useState("")
-  const [wardFilter, setWardFilter] = useState("all")
-  const [statusFilter, setStatusFilter] = useState("all")
-  const [isAddOpen, setIsAddOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("");
+  const [wardFilter, setWardFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [isAddOpen, setIsAddOpen] = useState(false);
 
   const filteredRooms = rooms.filter((room) => {
-    const matchesSearch = room.name.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesWard = wardFilter === "all" || room.ward === wardFilter
-    const matchesStatus = statusFilter === "all" || room.status === statusFilter
-    return matchesSearch && matchesWard && matchesStatus
-  })
+    const matchesSearch = room.name
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
+    const matchesWard = wardFilter === "all" || room.ward === wardFilter;
+    const matchesStatus =
+      statusFilter === "all" || room.status === statusFilter;
+    return matchesSearch && matchesWard && matchesStatus;
+  });
 
   return (
     <div className="flex flex-col">
@@ -86,7 +95,9 @@ export default function RoomsPage() {
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Add New Room</DialogTitle>
-                  <DialogDescription>Create a new room in a ward</DialogDescription>
+                  <DialogDescription>
+                    Create a new room in a ward
+                  </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                   <div className="space-y-2">
@@ -131,7 +142,9 @@ export default function RoomsPage() {
                   <Button variant="outline" onClick={() => setIsAddOpen(false)}>
                     Cancel
                   </Button>
-                  <Button onClick={() => setIsAddOpen(false)}>Create Room</Button>
+                  <Button onClick={() => setIsAddOpen(false)}>
+                    Create Room
+                  </Button>
                 </div>
               </DialogContent>
             </Dialog>
@@ -145,14 +158,23 @@ export default function RoomsPage() {
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary/10">
-                      <DoorOpen className="h-5 w-5 text-secondary" />
+                      <DoorOpen className="h-5 w-5 text-primary" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-foreground">{room.name}</h3>
-                      <p className="text-xs text-muted-foreground">{room.ward}</p>
+                      <h3 className="font-semibold text-foreground">
+                        {room.name}
+                      </h3>
+                      <p className="text-xs text-muted-foreground">
+                        {room.ward}
+                      </p>
                     </div>
                   </div>
-                  <Badge variant="secondary" className={statusColors[room.status as keyof typeof statusColors]}>
+                  <Badge
+                    variant="secondary"
+                    className={
+                      statusColors[room.status as keyof typeof statusColors]
+                    }
+                  >
                     {room.status}
                   </Badge>
                 </div>
@@ -180,5 +202,5 @@ export default function RoomsPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

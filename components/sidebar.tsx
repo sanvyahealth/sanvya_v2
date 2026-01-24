@@ -25,12 +25,12 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 
 const adminNavItems = [
   { title: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { title: "Patients", href: "/admin/patients", icon: Users },
-  { title: "Staffs", href: "#", icon: UserRound },
+  { title: "Staffs", href: "/admin/staffs", icon: UserRound },
   { title: "Doctors", href: "/admin/doctors", icon: Stethoscope },
   { title: "Departments", href: "/admin/departments", icon: Building2 },
   { title: "Wards", href: "/admin/wards", icon: BedDouble },
@@ -40,16 +40,24 @@ const adminNavItems = [
   { title: "Lab & Radiology", href: "/admin/lab", icon: FlaskConical },
   { title: "Billing", href: "/admin/billing", icon: CreditCard },
   { title: "Reports", href: "/admin/reports", icon: FileText },
-  { title: "Nurses", href: "#", icon: UserRound },
-  { title: "Lab Technicians", href: "#", icon: FlaskConical },
-  { title: "Pharmacists", href: "#", icon: Stethoscope },
-  { title: "Prescriptions", href: "#", icon: FileText },
-  { title: "Inventory", href: "#", icon: Building2 },
-  { title: "OPD Revenue", href: "#", icon: DoorOpen },
-  { title: "Analytics", href: "#", icon: Calendar },
-  { title: "User Managements", href: "#", icon: UserRound },
-  { title: "Lab Reports", href: "#", icon: FlaskConical },
-  { title: "Notifications", href: "#", icon: FileText },
+  { title: "Nurses", href: "/admin/nurse", icon: UserRound },
+  {
+    title: "Lab Technicians",
+    href: "/admin/lab-technicians",
+    icon: FlaskConical,
+  },
+  { title: "Pharmacists", href: "/admin/pharmacists", icon: Stethoscope },
+  { title: "Prescriptions", href: "/admin/prescriptions", icon: FileText },
+  { title: "Inventory", href: "/admin/inventory", icon: Building2 },
+  { title: "OPD Revenue", href: "/admin/opd-revenue", icon: DoorOpen },
+  { title: "Analytics", href: "/admin/analytics", icon: Calendar },
+  {
+    title: "User Managements",
+    href: "/admin/user-managements",
+    icon: UserRound,
+  },
+  { title: "Lab Reports", href: "/admin/lab-reports", icon: FlaskConical },
+  { title: "Notifications", href: "/admin/notifications", icon: FileText },
   { title: "Settings", href: "/admin/settings", icon: Settings },
 ];
 
@@ -113,7 +121,7 @@ function SidebarContent({
         </div>
       </div>
 
-      <ScrollArea className="flex-1 px-3 py-4">
+      <ScrollArea className="flex-1 px-3 py-4 min-h-0">
         <nav className="space-y-1">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
@@ -167,7 +175,7 @@ export function Sidebar({
   return (
     <>
       {/* Desktop Sidebar */}
-      <div className="hidden lg:flex h-screen w-64 flex-col border-r border-border bg-card">
+      <div className="hidden lg:flex h-screen w-64 flex-col border-r border-border bg-card overflow-hidden">
         <SidebarContent
           userType={userType}
           userName={userName}
@@ -178,6 +186,9 @@ export function Sidebar({
       {/* Mobile Sidebar */}
       <Sheet open={open} onOpenChange={onOpenChange}>
         <SheetContent side="left" className="p-0 w-64">
+          <div className="sr-only">
+            <SheetTitle>Navigation Menu</SheetTitle>
+          </div>
           <div className="flex h-full flex-col bg-card">
             <SidebarContent
               userType={userType}
