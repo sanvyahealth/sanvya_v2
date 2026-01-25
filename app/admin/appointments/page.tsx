@@ -1,13 +1,33 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Header } from "@/components/header"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useState } from "react";
+import { Header } from "@/components/header";
+import { StatsCard } from "@/components/stats-card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -15,58 +35,240 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
-import { Calendar } from "@/components/ui/calendar"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Search, Plus, CalendarIcon, Clock, Edit, X, Check } from "lucide-react"
-import { appointments, doctors, patients as patientsList } from "@/lib/demo-data"
-import { format } from "date-fns"
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Label } from "@/components/ui/label";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Search,
+  Plus,
+  Calendar as CalendarIcon,
+  Clock,
+  Edit,
+  Trash2,
+  CheckCircle2,
+  AlertCircle,
+  XCircle,
+  Clock as PendingIcon,
+} from "lucide-react";
+import {
+  appointments,
+  doctors,
+  patients as patientsList,
+} from "@/lib/demo-data";
+import { format } from "date-fns";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
+import { cn } from "@/lib/utils";
+
+// --- Stats & Chart Data ---
+const pendingCount = appointments.filter((a) => a.status === "Pending").length;
+const confirmedCount = appointments.filter(
+  (a) => a.status === "Confirmed",
+).length;
+const completedCount = appointments.filter(
+  (a) => a.status === "Completed",
+).length;
+const cancelledCount = appointments.filter(
+  (a) => a.status === "Cancelled",
+).length; // Assuming Cancelled exists or 0 if not in demo data
+
+const statusData = [
+  { name: "Pending", value: pendingCount },
+  { name: "Confirmed", value: confirmedCount },
+  { name: "Completed", value: completedCount },
+  { name: "Cancelled", value: cancelledCount || 12 }, // Mocking cancelled if 0 for view
+];
+
+const COLORS = ["#f59e0b", "#3b82f6", "#10b981", "#ef4444"];
+
+const trendData = [
+  { day: "Day 1", appointments: 12 },
+  { day: "Day 2", appointments: 18 },
+  { day: "Day 3", appointments: 15 },
+  { day: "Day 4", appointments: 25 },
+  { day: "Day 5", appointments: 20 },
+  { day: "Day 6", appointments: 30 },
+  { day: "Day 7", appointments: 22 },
+];
 
 const statusColors = {
   Confirmed: "bg-green-100 text-green-700",
   Pending: "bg-amber-100 text-amber-700",
   Cancelled: "bg-red-100 text-red-700",
   Completed: "bg-blue-100 text-blue-700",
-}
+};
 
 export default function AppointmentsPage() {
-  const [searchQuery, setSearchQuery] = useState("")
-  const [statusFilter, setStatusFilter] = useState("all")
-  const [date, setDate] = useState<Date>()
-  const [isAddOpen, setIsAddOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("");
+  const [date, setDate] = useState<Date | undefined>(new Date());
+  const [isAddOpen, setIsAddOpen] = useState(false);
+  const [view, setView] = useState("list");
 
+  // Filter Logic
   const filteredAppointments = appointments.filter((apt) => {
     const matchesSearch =
       apt.patientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      apt.doctorName.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesStatus = statusFilter === "all" || apt.status === statusFilter
-    return matchesSearch && matchesStatus
-  })
+      apt.doctorName.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesSearch;
+  });
+
+  const appointmentsOnSelectedDate = appointments.filter((apt) => {
+    if (!date) return false;
+    // VERY Basic date matching for demo - assuming demo data dates are roughly near.
+    // In real app, proper date comparison needed.
+    // For now, if demo data format matches "YYYY-MM-DD", we compare strings.
+    const selectedStr = format(date, "yyyy-MM-dd");
+    return apt.date === selectedStr;
+  });
 
   return (
-    <div className="flex flex-col">
-      <Header title="Appointments" />
+    <div className="flex flex-col min-h-screen bg-gray-50/50">
+      <Header title="Appointment Management" />
 
-      <div className="flex-1 space-y-6 p-6">
-        <Card className="border-border">
-          <CardHeader>
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <CardTitle>Appointment Management</CardTitle>
-                <CardDescription>Schedule and manage patient appointments</CardDescription>
+      <main className="flex-1 space-y-8 p-6">
+        {/* 1. Stats Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatsCard
+            title="Pending"
+            value={pendingCount}
+            icon={PendingIcon}
+            iconColor="bg-amber-100 text-amber-600"
+          />
+          <StatsCard
+            title="Confirmed"
+            value={confirmedCount}
+            icon={CheckCircle2}
+            iconColor="bg-blue-100 text-blue-600"
+          />
+          <StatsCard
+            title="Completed"
+            value={completedCount}
+            icon={CheckCircle2}
+            iconColor="bg-green-100 text-green-600"
+          />
+          <StatsCard
+            title="Cancelled"
+            value={cancelledCount}
+            icon={XCircle}
+            iconColor="bg-red-100 text-red-600"
+          />
+        </div>
+
+        {/* 2. Graphs Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Status Distribution */}
+          <Card className="border-none shadow-sm">
+            <CardHeader>
+              <CardTitle>Appointment Status</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[300px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={statusData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={100}
+                      paddingAngle={5}
+                      dataKey="value"
+                    >
+                      {statusData.map((entry, index) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={COLORS[index % COLORS.length]}
+                        />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Trend Graph */}
+          <Card className="border-none shadow-sm">
+            <CardHeader>
+              <CardTitle>Appointments Trend (Last 7 Days)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[300px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={trendData}>
+                    <defs>
+                      <linearGradient id="colorApt" x1="0" y1="0" x2="0" y2="1">
+                        <stop
+                          offset="5%"
+                          stopColor="#8884d8"
+                          stopOpacity={0.8}
+                        />
+                        <stop
+                          offset="95%"
+                          stopColor="#8884d8"
+                          stopOpacity={0}
+                        />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                    <XAxis dataKey="day" />
+                    <YAxis />
+                    <Tooltip />
+                    <Area
+                      type="monotone"
+                      dataKey="appointments"
+                      stroke="#8884d8"
+                      fillOpacity={1}
+                      fill="url(#colorApt)"
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* 3. Main Content (Tabs) */}
+        <Tabs defaultValue="list" className="w-full" onValueChange={setView}>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+            <TabsList>
+              <TabsTrigger value="list">List View</TabsTrigger>
+              <TabsTrigger value="calendar">Calendar View</TabsTrigger>
+            </TabsList>
+
+            <div className="flex gap-2 w-full sm:w-auto">
               <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
                 <DialogTrigger asChild>
-                  <Button>
-                    <Plus className="mr-2 h-4 w-4" />
-                    New Appointment
+                  <Button className="w-full sm:w-auto">
+                    <Plus className="mr-2 h-4 w-4" /> Add Appointment
                   </Button>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>Schedule Appointment</DialogTitle>
-                    <DialogDescription>Book a new patient appointment</DialogDescription>
+                    <DialogTitle>New Appointment</DialogTitle>
+                    <DialogDescription>
+                      Schedule a new appointment for a patient.
+                    </DialogDescription>
                   </DialogHeader>
                   <div className="grid gap-4 py-4">
                     <div className="space-y-2">
@@ -78,7 +280,7 @@ export default function AppointmentsPage() {
                         <SelectContent>
                           {patientsList.map((p) => (
                             <SelectItem key={p.id} value={p.id}>
-                              {p.name} ({p.id})
+                              {p.name}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -93,7 +295,7 @@ export default function AppointmentsPage() {
                         <SelectContent>
                           {doctors.map((d) => (
                             <SelectItem key={d.id} value={d.id}>
-                              {d.name} - {d.specialization}
+                              {d.name} ({d.specialization})
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -104,13 +306,24 @@ export default function AppointmentsPage() {
                         <Label>Date</Label>
                         <Popover>
                           <PopoverTrigger asChild>
-                            <Button variant="outline" className="w-full justify-start bg-transparent">
+                            <Button
+                              variant="outline"
+                              className={cn(
+                                "w-full justify-start text-left font-normal",
+                                !date && "text-muted-foreground",
+                              )}
+                            >
                               <CalendarIcon className="mr-2 h-4 w-4" />
                               {date ? format(date, "PPP") : "Pick a date"}
                             </Button>
                           </PopoverTrigger>
                           <PopoverContent className="w-auto p-0">
-                            <Calendar mode="single" selected={date} onSelect={setDate} />
+                            <Calendar
+                              mode="single"
+                              selected={date}
+                              onSelect={setDate}
+                              initialFocus
+                            />
                           </PopoverContent>
                         </Popover>
                       </div>
@@ -121,7 +334,14 @@ export default function AppointmentsPage() {
                             <SelectValue placeholder="Select time" />
                           </SelectTrigger>
                           <SelectContent>
-                            {["09:00 AM", "10:00 AM", "11:00 AM", "02:00 PM", "03:00 PM", "04:00 PM"].map((t) => (
+                            {[
+                              "09:00 AM",
+                              "10:00 AM",
+                              "11:00 AM",
+                              "02:00 PM",
+                              "03:00 PM",
+                              "04:00 PM",
+                            ].map((t) => (
                               <SelectItem key={t} value={t}>
                                 {t}
                               </SelectItem>
@@ -130,115 +350,165 @@ export default function AppointmentsPage() {
                         </Select>
                       </div>
                     </div>
-                    <div className="space-y-2">
-                      <Label>Appointment Type</Label>
-                      <Select>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Consultation">Consultation</SelectItem>
-                          <SelectItem value="Follow-up">Follow-up</SelectItem>
-                          <SelectItem value="Surgery">Surgery</SelectItem>
-                          <SelectItem value="Emergency">Emergency</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
                   </div>
-                  <div className="flex justify-end gap-3">
-                    <Button variant="outline" onClick={() => setIsAddOpen(false)}>
-                      Cancel
+                  <DialogFooter>
+                    <Button onClick={() => setIsAddOpen(false)}>
+                      Schedule
                     </Button>
-                    <Button onClick={() => setIsAddOpen(false)}>Schedule</Button>
-                  </div>
+                  </DialogFooter>
                 </DialogContent>
               </Dialog>
             </div>
-          </CardHeader>
-          <CardContent>
-            {/* Filters */}
-            <div className="mb-6 flex flex-col gap-4 sm:flex-row">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  placeholder="Search by patient or doctor..."
-                  className="pl-9"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-full sm:w-40">
-                  <SelectValue placeholder="All Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="Confirmed">Confirmed</SelectItem>
-                  <SelectItem value="Pending">Pending</SelectItem>
-                  <SelectItem value="Cancelled">Cancelled</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          </div>
 
-            {/* Table */}
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Appointment ID</TableHead>
-                    <TableHead>Patient</TableHead>
-                    <TableHead>Doctor</TableHead>
-                    <TableHead>Department</TableHead>
-                    <TableHead>Date & Time</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredAppointments.map((apt) => (
-                    <TableRow key={apt.id}>
-                      <TableCell className="font-mono text-xs">{apt.id}</TableCell>
-                      <TableCell className="font-medium">{apt.patientName}</TableCell>
-                      <TableCell>{apt.doctorName}</TableCell>
-                      <TableCell>{apt.department}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <CalendarIcon className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-sm">{apt.date}</span>
-                          <Clock className="ml-2 h-4 w-4 text-muted-foreground" />
-                          <span className="text-sm">{apt.time}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline">{apt.type}</Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="secondary" className={statusColors[apt.status as keyof typeof statusColors]}>
-                          {apt.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1">
-                          <Button variant="ghost" size="icon" title="Confirm">
-                            <Check className="h-4 w-4 text-green-600" />
-                          </Button>
-                          <Button variant="ghost" size="icon" title="Edit">
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="icon" title="Cancel">
-                            <X className="h-4 w-4 text-red-600" />
-                          </Button>
-                        </div>
-                      </TableCell>
+          <TabsContent value="list" className="mt-0">
+            <Card className="border-none shadow-sm">
+              <CardHeader>
+                <div className="relative max-w-sm">
+                  <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search by patient or doctor..."
+                    className="pl-8"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>ID</TableHead>
+                      <TableHead>Patient</TableHead>
+                      <TableHead>Doctor</TableHead>
+                      <TableHead>Date & Time</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Action</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredAppointments.length > 0 ? (
+                      filteredAppointments.map((apt) => (
+                        <TableRow key={apt.id}>
+                          <TableCell className="font-medium">
+                            {apt.id}
+                          </TableCell>
+                          <TableCell>{apt.patientName}</TableCell>
+                          <TableCell>{apt.doctorName}</TableCell>
+                          <TableCell>
+                            <div className="flex flex-col text-xs">
+                              <span className="font-medium">{apt.date}</span>
+                              <span className="text-muted-foreground">
+                                {apt.time}
+                              </span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge
+                              variant="secondary"
+                              className={
+                                statusColors[
+                                  apt.status as keyof typeof statusColors
+                                ]
+                              }
+                            >
+                              {apt.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-2">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8"
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-red-500 hover:bg-red-50 hover:text-red-700"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={6} className="h-24 text-center">
+                          No appointments found.
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="calendar" className="mt-0">
+            <Card className="border-none shadow-sm">
+              <CardContent className="p-6">
+                <div className="flex flex-col md:flex-row gap-6">
+                  <div className="border rounded-md p-4 bg-muted/20 w-fit h-fit">
+                    <Calendar
+                      mode="single"
+                      selected={date}
+                      onSelect={setDate}
+                      className="rounded-md border bg-card"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold mb-4">
+                      Appointments for{" "}
+                      {date ? format(date, "PPP") : "Selected Date"}
+                    </h3>
+                    {appointmentsOnSelectedDate.length > 0 ? (
+                      <div className="space-y-4">
+                        {appointmentsOnSelectedDate.map((apt) => (
+                          <div
+                            key={apt.id}
+                            className="flex items-center justify-between p-4 border rounded-lg bg-card hover:shadow-sm"
+                          >
+                            <div className="flex items-center gap-4">
+                              <div className="p-2 bg-primary/10 rounded-full">
+                                <Clock className="h-5 w-5 text-primary" />
+                              </div>
+                              <div>
+                                <p className="font-medium">{apt.time}</p>
+                                <p className="text-sm text-muted-foreground">
+                                  {apt.patientName} with {apt.doctorName}
+                                </p>
+                              </div>
+                            </div>
+                            <Badge
+                              variant="secondary"
+                              className={
+                                statusColors[
+                                  apt.status as keyof typeof statusColors
+                                ]
+                              }
+                            >
+                              {apt.status}
+                            </Badge>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center h-48 text-muted-foreground border-2 border-dashed rounded-lg">
+                        <CalendarIcon className="h-8 w-8 mb-2" />
+                        <p>No appointments scheduled for this date.</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </main>
     </div>
-  )
+  );
 }

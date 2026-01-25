@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Header } from "@/components/header";
 import { StatsCard } from "@/components/stats-card";
 import {
@@ -9,9 +10,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -20,343 +20,485 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 import {
+  UserPlus,
+  Stethoscope,
   Users,
-  BedDouble,
   Calendar,
-  IndianRupee,
-  TrendingUp,
-  Activity,
+  UserCog,
+  ShieldAlert,
+  BarChart3,
+  Share2,
+  FileText,
+  FileSpreadsheet,
+  Download,
   Building2,
+  List,
+  IndianRupee,
   Clock,
+  CheckCircle2,
+  AlertCircle,
+  Pill,
+  FlaskConical,
+  PackageMinus,
+  Search,
+  Eye,
+  MoreVertical,
 } from "lucide-react";
 import {
-  patients,
-  departments,
-  appointments,
-  analyticsData,
-} from "@/lib/demo-data";
-import {
-  AreaChart,
-  Area,
+  PieChart,
+  Pie,
+  Cell,
+  LineChart,
+  Line,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
+  Legend,
   ResponsiveContainer,
   BarChart,
   Bar,
 } from "recharts";
+import { appointments } from "@/lib/demo-data";
 
-const revenueData = [
-  { month: "Jan", revenue: 4200000, patients: 320 },
-  { month: "Feb", revenue: 3800000, patients: 290 },
-  { month: "Mar", revenue: 4500000, patients: 350 },
-  { month: "Apr", revenue: 4100000, patients: 310 },
-  { month: "May", revenue: 4800000, patients: 380 },
-  { month: "Jun", revenue: 4520000, patients: 345 },
+// --- Mock Data for Charts ---
+
+const appointmentStatusData = [
+  { name: "Pending", value: 12, color: "#f59e0b" },
+  { name: "Confirmed", value: 25, color: "#3b82f6" },
+  { name: "Cancelled", value: 5, color: "#ef4444" },
+  { name: "Completed", value: 45, color: "#10b981" },
 ];
 
-const departmentData = departments.map((d) => ({
-  name: d.name,
-  occupancy: d.occupancy,
-}));
+const revenueMethodData = [
+  { name: "Mon", Cash: 4000, Card: 2400, UPI: 2400 },
+  { name: "Tue", Cash: 3000, Card: 1398, UPI: 2210 },
+  { name: "Wed", Cash: 2000, Card: 9800, UPI: 2290 },
+  { name: "Thu", Cash: 2780, Card: 3908, UPI: 2000 },
+  { name: "Fri", Cash: 1890, Card: 4800, UPI: 2181 },
+  { name: "Sat", Cash: 2390, Card: 3800, UPI: 2500 },
+  { name: "Sun", Cash: 3490, Card: 4300, UPI: 2100 },
+];
 
-const statusColors = {
-  Admitted: "bg-blue-100 text-blue-700",
-  Discharged: "bg-green-100 text-green-700",
-  Pending: "bg-amber-100 text-amber-700",
-  Confirmed: "bg-green-100 text-green-700",
-};
+const appointmentsPerDayData = [
+  { day: "Mon", appointments: 45 },
+  { day: "Tue", appointments: 52 },
+  { day: "Wed", appointments: 38 },
+  { day: "Thu", appointments: 65 },
+  { day: "Fri", appointments: 48 },
+  { day: "Sat", appointments: 55 },
+  { day: "Sun", appointments: 20 },
+];
 
-const pieColors = [
-  "#6366f1",
-  "#14b8a6",
-  "#f59e0b",
-  "#ef4444",
-  "#8b5cf6",
-  "#ec4899",
-  "#06b6d4",
+const doctorPerformanceData = [
+  { name: "Dr. Anil", score: 95 },
+  { name: "Dr. Meera", score: 88 },
+  { name: "Dr. Suresh", score: 92 },
+  { name: "Dr. Ramesh", score: 85 },
+  { name: "Dr. Kavita", score: 78 },
+];
+
+const patientDemographicsData = [
+  { name: "Male", value: 550, color: "#3b82f6" },
+  { name: "Female", value: 450, color: "#ec4899" },
+];
+
+// --- Small Cards Data ---
+const smallCards = [
+  { title: "Add Patient", icon: UserPlus, color: "text-blue-500" },
+  { title: "Add Doctor", icon: Stethoscope, color: "text-green-500" },
+  { title: "Add Staff", icon: Users, color: "text-purple-500" },
+  { title: "Appointments", icon: Calendar, color: "text-orange-500" },
+  { title: "User Mgmt", icon: UserCog, color: "text-indigo-500" },
+  { title: "Security", icon: ShieldAlert, color: "text-red-500" },
+  { title: "Analytics", icon: BarChart3, color: "text-pink-500" },
+  { title: "Ref. Doctors", icon: Share2, color: "text-cyan-500" },
+  { title: "Referred List", icon: List, color: "text-teal-500" },
+  { title: "Daily Report", icon: FileText, color: "text-yellow-500" },
+  { title: "Monthly Rpt", icon: FileSpreadsheet, color: "text-lime-500" },
+  { title: "Export Center", icon: Download, color: "text-gray-500" },
+  { title: "IPD Admin", icon: Building2, color: "text-amber-500" },
+];
+
+// --- Normal Cards Data ---
+const normalCards = [
+  {
+    title: "Total Patients",
+    value: "1,250",
+    change: "+12%",
+    changeType: "positive",
+    icon: Users,
+    iconColor: "bg-blue-100 text-blue-600",
+  },
+  {
+    title: "Total Doctors",
+    value: "45",
+    change: "+2",
+    changeType: "positive",
+    icon: Stethoscope,
+    iconColor: "bg-green-100 text-green-600",
+  },
+  {
+    title: "Total Appointments",
+    value: "3,450",
+    change: "+8%",
+    changeType: "positive",
+    icon: Calendar,
+    iconColor: "bg-purple-100 text-purple-600",
+  },
+  {
+    title: "Total Revenue",
+    value: "₹45.2L",
+    change: "+15%",
+    changeType: "positive",
+    icon: IndianRupee,
+    iconColor: "bg-yellow-100 text-yellow-600",
+  },
+  {
+    title: "Pending Appts",
+    value: "12",
+    change: "Needs action",
+    changeType: "negative",
+    icon: Clock,
+    iconColor: "bg-orange-100 text-orange-600",
+  },
+  {
+    title: "Completed Appts",
+    value: "48",
+    change: "Today",
+    changeType: "neutral",
+    icon: CheckCircle2,
+    iconColor: "bg-teal-100 text-teal-600",
+  },
+  {
+    title: "Total Staff",
+    value: "128",
+    change: "0",
+    changeType: "neutral",
+    icon: Users,
+    iconColor: "bg-indigo-100 text-indigo-600",
+  },
+  {
+    title: "Unpaid Bills",
+    value: "32",
+    change: "₹4.5L",
+    changeType: "negative",
+    icon: AlertCircle,
+    iconColor: "bg-red-100 text-red-600",
+  },
+  {
+    title: "Prescriptions",
+    value: "156",
+    change: "Today",
+    changeType: "neutral",
+    icon: Pill,
+    iconColor: "bg-pink-100 text-pink-600",
+  },
+  {
+    title: "Lab Reports",
+    value: "42",
+    change: "8 Pending",
+    changeType: "neutral",
+    icon: FlaskConical,
+    iconColor: "bg-cyan-100 text-cyan-600",
+  },
+  {
+    title: "Low Stock",
+    value: "5",
+    change: "Urgent",
+    changeType: "negative",
+    icon: PackageMinus,
+    iconColor: "bg-rose-100 text-rose-600",
+  },
 ];
 
 export default function AdminDashboard() {
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const filteredAppointments = appointments.filter(
+    (app) =>
+      app.patientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      app.doctorName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      app.id.toLowerCase().includes(searchTerm.toLowerCase()),
+  );
+
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col min-h-screen bg-gray-50/50 ">
       <Header title="Admin Dashboard" />
 
-      <div className="flex-1 space-y-6 p-6">
-        {/* Stats Grid */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <StatsCard
-            title="Total Patients"
-            value={analyticsData.totalPatients.toLocaleString()}
-            change="+12.5% from last month"
-            changeType="positive"
-            icon={Users}
-            iconColor="bg-primary"
-          />
-          <StatsCard
-            title="Admitted Today"
-            value={analyticsData.admittedPatients}
-            change="+8 from yesterday"
-            changeType="positive"
-            icon={BedDouble}
-            iconColor="bg-primary"
-          />
-          <StatsCard
-            title="Appointments"
-            value={analyticsData.todayAppointments}
-            change="12 pending confirmation"
-            changeType="neutral"
-            icon={Calendar}
-            iconColor="bg-amber-500"
-          />
-          <StatsCard
-            title="Revenue (MTD)"
-            value={`₹${(analyticsData.totalRevenue / 100000).toFixed(1)}L`}
-            change={`+${analyticsData.monthlyGrowth}% growth`}
-            changeType="positive"
-            icon={IndianRupee}
-            iconColor="bg-green-500"
-          />
+      <main className="flex-1 space-y-8 p-6">
+        {/* 1. Small Action Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 ">
+          {smallCards.map((card, index) => (
+            <Card
+              key={index}
+              className="hover:shadow-md transition-shadow cursor-pointer border-none shadow-sm"
+            >
+              <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-2">
+                <div className={`p-2 rounded-full bg-gray-100 ${card.color}`}>
+                  <card.icon className="w-5 h-5 " />
+                </div>
+                <span className="text-xs font-semibold text-gray-700 leading-tight">
+                  {card.title}
+                </span>
+              </CardContent>
+            </Card>
+          ))}
         </div>
 
-        {/* Charts Row */}
-        <div className="grid gap-6 lg:grid-cols-2">
-          {/* Revenue Chart */}
-          <Card className="border-border">
+        {/* 2. Normal Stats Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 ">
+          {normalCards.map((card, index) => (
+            <StatsCard
+              key={index}
+              title={card.title}
+              value={card.value}
+              change={card.change}
+              changeType={card.changeType as any}
+              icon={card.icon}
+              iconColor={card.iconColor}
+            />
+          ))}
+        </div>
+
+        {/* 3. Graphs Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+          {/* Appointments by Status - Pie Chart */}
+          <Card className="col-span-1 border-none shadow-sm">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="h-5 w-5 text-primary" />
-                Revenue Overview
-              </CardTitle>
-              <CardDescription>
-                Monthly revenue and patient admissions
-              </CardDescription>
+              <CardTitle className="text-lg">Appointments by Status</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-48 sm:h-72">
+              <div className="h-[300px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={revenueData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                    <XAxis dataKey="month" stroke="#64748b" fontSize={12} />
-                    <YAxis
-                      stroke="#64748b"
-                      fontSize={12}
-                      tickFormatter={(v) => `₹${v / 100000}L`}
-                    />
-                    <Tooltip
-                      formatter={(
-                        value: number | undefined,
-                        name: string | undefined,
-                      ) => [
-                        name === "revenue"
-                          ? `₹${((value ?? 0) / 100000).toFixed(1)}L`
-                          : (value ?? 0).toString(),
-                        name === "revenue" ? "Revenue" : "Patients",
-                      ]}
-                      contentStyle={{
-                        borderRadius: "8px",
-                        border: "1px solid #e2e8f0",
-                      }}
-                    />
-
-                    <Area
-                      type="monotone"
-                      dataKey="revenue"
-                      stroke="#6366f1"
-                      fill="#6366f1"
-                      fillOpacity={0.2}
-                    />
-                  </AreaChart>
+                  <PieChart>
+                    <Pie
+                      data={appointmentStatusData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={80}
+                      paddingAngle={5}
+                      dataKey="value"
+                    >
+                      {appointmentStatusData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                    <Legend />
+                  </PieChart>
                 </ResponsiveContainer>
               </div>
             </CardContent>
           </Card>
 
-          {/* Department Occupancy */}
-          <Card className="border-border">
+          {/* Revenue by Method - Line Chart */}
+          <Card className="col-span-1 lg:col-span-2 border-none shadow-sm">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Building2 className="h-5 w-5 text-primary" />
-                Department Occupancy
-              </CardTitle>
-              <CardDescription>
-                Bed occupancy rate by department
-              </CardDescription>
+              <CardTitle className="text-lg">Revenue by Method</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-48 sm:h-72">
+              <div className="h-[300px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={departmentData} layout="vertical">
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                    <XAxis
-                      type="number"
-                      domain={[0, 100]}
-                      stroke="#64748b"
-                      fontSize={12}
+                  <LineChart data={revenueMethodData}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Line
+                      type="monotone"
+                      dataKey="Cash"
+                      stroke="#8884d8"
+                      strokeWidth={2}
                     />
-                    <YAxis
-                      dataKey="name"
-                      type="category"
-                      stroke="#64748b"
-                      fontSize={11}
-                      width={90}
+                    <Line
+                      type="monotone"
+                      dataKey="Card"
+                      stroke="#82ca9d"
+                      strokeWidth={2}
                     />
-                    <Tooltip
-                      formatter={(value: number | undefined) => [
-                        `${value ?? 0}%`,
-                        "Occupancy",
-                      ]}
-                      contentStyle={{
-                        borderRadius: "8px",
-                        border: "1px solid #e2e8f0",
-                      }}
+                    <Line
+                      type="monotone"
+                      dataKey="UPI"
+                      stroke="#ffc658"
+                      strokeWidth={2}
                     />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Appointments Per Day - Bar/Area Chart */}
+          <Card className="col-span-1 border-none shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-lg">Appointments Per Day</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[300px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={appointmentsPerDayData}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                    <XAxis dataKey="day" />
+                    <YAxis />
+                    <Tooltip />
                     <Bar
-                      dataKey="occupancy"
-                      fill="#14b8a6"
-                      radius={[0, 4, 4, 0]}
+                      dataKey="appointments"
+                      fill="#6366f1"
+                      radius={[4, 4, 0, 0]}
                     />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
             </CardContent>
           </Card>
-        </div>
 
-        {/* Bottom Row */}
-        <div className="grid gap-6 lg:grid-cols-3">
-          {/* Recent Admissions */}
-          <Card className="border-border lg:col-span-2 w-full min-w-0 max-w-full">
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div>
-                <CardTitle>Recent Admissions</CardTitle>
-                <CardDescription>
-                  Latest patients admitted to the hospital
-                </CardDescription>
-              </div>
-              <Button variant="outline" size="sm">
-                View All
-              </Button>
-            </CardHeader>
-            <CardContent>
-              <div className="w-full overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Patient ID</TableHead>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Department</TableHead>
-                      <TableHead>Ward</TableHead>
-                      <TableHead>Status</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {patients.slice(0, 5).map((patient) => (
-                      <TableRow key={patient.id}>
-                        <TableCell className="font-mono text-xs">
-                          {patient.id}
-                        </TableCell>
-                        <TableCell className="font-medium">
-                          {patient.name}
-                        </TableCell>
-                        <TableCell>{patient.department}</TableCell>
-                        <TableCell>{patient.ward}</TableCell>
-                        <TableCell>
-                          <Badge
-                            variant="secondary"
-                            className={
-                              statusColors[
-                                patient.status as keyof typeof statusColors
-                              ]
-                            }
-                          >
-                            {patient.status}
-                          </Badge>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Today's Appointments */}
-          <Card className="border-border">
+          {/* Doctor Performance - Bar Chart */}
+          <Card className="col-span-1 border-none shadow-sm">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Clock className="h-5 w-5 text-amber-500" />
-                Today&apos;s Appointments
-              </CardTitle>
-              <CardDescription>
-                {appointments.length} scheduled for today
-              </CardDescription>
+              <CardTitle className="text-lg">Doctor Performance</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {appointments.slice(0, 4).map((apt) => (
-                  <div
-                    key={apt.id}
-                    className="flex items-center gap-4 rounded-lg border border-border bg-card p-3"
+              <div className="h-[300px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={doctorPerformanceData}
+                    layout="vertical"
+                    margin={{ left: 20 }}
                   >
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                      <Activity className="h-5 w-5 text-primary" />
-                    </div>
-                    <div className="flex-1 space-y-1">
-                      <p className="text-sm font-medium">{apt.patientName}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {apt.doctorName} • {apt.time}
-                      </p>
-                    </div>
-                    <Badge
-                      variant="secondary"
-                      className={
-                        statusColors[apt.status as keyof typeof statusColors]
-                      }
+                    <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+                    <XAxis type="number" domain={[0, 100]} />
+                    <YAxis dataKey="name" type="category" width={80} />
+                    <Tooltip />
+                    <Bar dataKey="score" fill="#14b8a6" radius={[0, 4, 4, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Patient Demographics - Pie Chart */}
+          <Card className="col-span-1 border-none shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-lg">Patient Demographics</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[300px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={patientDemographicsData}
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={80}
+                      dataKey="value"
+                      label
                     >
-                      {apt.status}
-                    </Badge>
-                  </div>
-                ))}
+                      {patientDemographicsData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Department Stats */}
-        <Card className="border-border">
-          <CardHeader>
-            <CardTitle>Department Overview</CardTitle>
-            <CardDescription>Quick stats for all departments</CardDescription>
+        {/* 4. Recent Appointments Table */}
+        <Card className="border-none shadow-sm">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="text-lg">Recent Appointments</CardTitle>
+              <CardDescription>
+                Overview of latest scheduled appointments
+              </CardDescription>
+            </div>
+            <div className="relative w-64">
+              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search appointments..."
+                className="pl-8"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {departments.slice(0, 4).map((dept) => (
-                <div
-                  key={dept.id}
-                  className="rounded-lg border border-border bg-muted/30 p-4"
-                >
-                  <h4 className="font-medium text-foreground">{dept.name}</h4>
-                  <p className="text-xs text-muted-foreground">{dept.head}</p>
-                  <div className="mt-3 space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">Occupancy</span>
-                      <span className="font-medium">{dept.occupancy}%</span>
-                    </div>
-                    <Progress value={dept.occupancy} className="h-2" />
-                    <div className="flex justify-between text-xs text-muted-foreground">
-                      <span>{dept.beds} beds</span>
-                      <span>{dept.staff} staff</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>ID</TableHead>
+                    <TableHead>Patient</TableHead>
+                    <TableHead>Doctor</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Time</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredAppointments.length > 0 ? (
+                    filteredAppointments.map((apt) => (
+                      <TableRow key={apt.id}>
+                        <TableCell className="font-medium">{apt.id}</TableCell>
+                        <TableCell>{apt.patientName}</TableCell>
+                        <TableCell>{apt.doctorName}</TableCell>
+                        <TableCell>{apt.date}</TableCell>
+                        <TableCell>{apt.time}</TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={
+                              apt.status === "Confirmed"
+                                ? "default" // Using default (primary) for confirmed which is usually good
+                                : apt.status === "Pending"
+                                  ? "secondary" // Secondary (often muted/yellowish) for pending
+                                  : apt.status === "Cancelled"
+                                    ? "destructive" // Destructive (red) for cancelled
+                                    : "outline"
+                            }
+                            className={
+                              apt.status === "Confirmed"
+                                ? "bg-green-100 text-green-700 hover:bg-green-100 border-green-200"
+                                : apt.status === "Pending"
+                                  ? "bg-amber-100 text-amber-700 hover:bg-amber-100 border-amber-200"
+                                  : ""
+                            }
+                          >
+                            {apt.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                          >
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={7} className="h-24 text-center">
+                        No appointments found.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
             </div>
           </CardContent>
         </Card>
-      </div>
+      </main>
     </div>
   );
 }

@@ -109,7 +109,7 @@ export default function StaffPage() {
             title="Total Staff"
             value={staffList.length}
             icon={Users}
-            iconColor="bg-blue-500"
+            iconColor="bg-blue-500 text-white"
             change="Active staff members"
             changeType="neutral"
           />

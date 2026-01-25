@@ -20,11 +20,11 @@ export function StatsCard({
   iconColor,
 }: StatsCardProps) {
   return (
-    <Card className="border-2 bg-card hover:border-primary animation duration-300 ease-in-out hover:shadow-sm hover:shadow-zinc-400">
+    <Card className="border bg-card hover:border-primary animation duration-300 ease-in-out hover:shadow-sm hover:shadow-zinc-400">
       <CardContent className="p-6">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between ">
           <div className="space-y-1">
-            <p className="text-sm text-muted-foreground">{title}</p>
+            <p className="text-sm text-muted-foreground ">{title}</p>
             <p className="text-2xl font-bold text-foreground">{value}</p>
             {change && (
               <p
@@ -41,14 +41,14 @@ export function StatsCard({
           </div>
           <div
             className={cn(
-              "flex h-12 w-12 items-center justify-center rounded-xl",
-              iconColor || "bg-primary/10",
+              "flex h-12 w-12 items-center justify-center rounded-xl ",
+              iconColor || "bg-primary",
             )}
           >
             <Icon
               className={cn(
                 "h-6 w-6",
-                iconColor ? "text-white" : "text-primary",
+                iconColor ? "text-current" : "text-primary-foreground",
               )}
             />
           </div>
